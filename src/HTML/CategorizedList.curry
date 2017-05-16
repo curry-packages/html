@@ -24,7 +24,7 @@ import Char
 --- @param categoryFun uses the keys of the items and the keys of the
 --- categories to distribute the items among the categories.
 --- @return Html containing inner links between the categories
-list2CategorizedHtml :: [(a,[HtmlExp])] -> [(b,String)] -> (a -> b -> Bool)
+list2CategorizedHtml :: Show b => [(a,[HtmlExp])] -> [(b,String)] -> (a -> b -> Bool)
                         -> [HtmlExp]
 list2CategorizedHtml itemL categoryL categoryFun =
    categories2LinkList categoryL :
@@ -40,7 +40,7 @@ list2CategorizedHtml itemL categoryL categoryFun =
         categoryL
 
 -- the navigation list
-categories2LinkList :: [(_,String)] -> HtmlExp
+categories2LinkList :: Show a => [(a,String)] -> HtmlExp
 categories2LinkList categoryL =
   par
   [center
