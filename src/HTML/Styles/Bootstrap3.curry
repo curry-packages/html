@@ -3,7 +3,7 @@
 --- rendered with [Bootstrap](http://twitter.github.com/bootstrap/)
 ---
 --- @author Michael Hanus
---- @version January 2016
+--- @version October 2017
 --- @category web
 ----------------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ module HTML.Styles.Bootstrap3
  , glyphicon, homeIcon, userIcon, loginIcon, logoutIcon
  ) where
 
-import HTML
+import HTML.Base
 
 ----------------------------------------------------------------------------
 --- An HTML form rendered with bootstrap.

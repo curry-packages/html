@@ -9,9 +9,10 @@ module HTML.CategorizedList
   (list2CategorizedHtml, categorizeByItemKey, stringList2ItemList)
  where
 
-import List
-import HTML
 import Char
+import List
+
+import HTML.Base
 
 --- General categorization of a list of entries.
 ---
