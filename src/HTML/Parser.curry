@@ -2,14 +2,14 @@
 --- This module contains a very simple parser for HTML documents.
 ---
 --- @author Michael Hanus
---- @version March 2015
+--- @version October 2017
 --- @category web
 ------------------------------------------------------------------------------
 
 module HTML.Parser(readHtmlFile,parseHtmlString) where
 
-import HTML
 import Char
+import HTML.Base
 
 --- Reads a file with HTML text and returns the corresponding HTML expressions.
 --- @param file - the name of a file containing HTML text
