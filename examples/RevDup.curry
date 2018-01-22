@@ -23,4 +23,4 @@ main = return $ form "QUESTION" $
 
 
 -- Install the CGI program by:
--- curry makecgi -cpm -o ~/public_html/revdup.cgi RevDup
+-- curry makecgi -o ~/public_html/revdup.cgi RevDup

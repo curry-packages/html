@@ -30,6 +30,7 @@ import List
 
 --------------------------------------------------------------------------
 -- Should the log messages of the server stored in a log file?
+withCgiLogging :: Bool
 withCgiLogging = True
 
 --------------------------------------------------------------------------
@@ -75,6 +76,7 @@ readCgiServerMsg handle = do
 -- "-loadbalance <t>": specifies kind of load balancing (see makecurrycgi)
 --                     Current possible values for <t>:
 --                     "no|standard|multiple"
+submitForm :: IO ()
 submitForm = do
   args <- getArgs
   let (serverargs,lb,rargs) = stripServerArgs "" NoBalance args
@@ -137,6 +139,7 @@ runCgiServerCmd portname cmd = case cmd of
   _ -> error "HtmlCgi.runCgiServerCmd: called with illegal command!"
 
 --- Translates a cgi progname and key into a name for a port:
+cgikey2portname :: String -> String
 cgikey2portname cgikey =
   concatMap (\c->if isAlphaNum c then [c] else []) cgikey
 
@@ -220,6 +223,7 @@ noHandlerPage cgiurl urlparam =
 --- that are transmitted to the application program.
 --- Currently, it contains only a selection of all reasonable variables
 --- but this list can be easily extended.
+cgiServerEnvVars :: [String]
 cgiServerEnvVars =
   ["PATH_INFO","QUERY_STRING","HTTP_COOKIE","REMOTE_HOST","REMOTE_ADDR",
    "REQUEST_METHOD","SCRIPT_NAME","SERVER_NAME","SERVER_PORT"]
@@ -228,6 +232,7 @@ cgiServerEnvVars =
 -- If the port of the application server is not available within the timeout
 -- period, we assume that the application server does not exist and we start
 -- a new one.
+scriptServerTimeOut :: Int
 scriptServerTimeOut = 1000
 
 -- send a message to the script server and return the connection handle,
@@ -238,6 +243,8 @@ trySendScriptServerMessage portname msg =
   maybe failed (\h -> hPutStrLn h (showQTerm msg) >> hFlush h >> return h)
 
 -- submit an initial web page request to a server or restart it:
+submitToServerOrStart :: String -> String -> LoadBalance -> String -> String
+                      -> String -> [(String,String)] -> IO ()
 submitToServerOrStart url serverargs loadbalance pname scriptkey
                       serverprog cgiServerEnv =
    connectToSocketRepeat scriptServerTimeOut done 0 completeportname >>=
@@ -332,6 +339,7 @@ copyOutputAndClose h = do
            else done
 
 -- Puts a line to stderr:
+putErrLn :: String -> IO ()
 putErrLn s = hPutStrLn stderr s >> hFlush stderr
 
 ------------------------------------------------------------------------------
@@ -393,6 +401,7 @@ includeCoordinates ((tag,val):cenv)
    
 
 -- get n chars from stdin:
+getNChar :: Int -> IO String
 getNChar n = if n<=0 then return ""
                      else do c <- getChar
                              cs <- getNChar (n-1)
@@ -400,6 +409,7 @@ getNChar n = if n<=0 then return ""
 
 ------------------------------------------------------------------------------
 --- The name of the file to register all cgi servers.
+cgiServerRegistry :: String
 cgiServerRegistry = "/tmp/CURRY_CGI_REGISTRY"
 
 -- Register a new cgi server process (for global management of all such
