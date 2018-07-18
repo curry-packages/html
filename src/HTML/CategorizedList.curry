@@ -9,8 +9,8 @@ module HTML.CategorizedList
   (list2CategorizedHtml, categorizeByItemKey, stringList2ItemList)
  where
 
-import Char
-import List
+import Data.Char
+import Data.List
 
 import HTML.Base
 
@@ -33,7 +33,7 @@ list2CategorizedHtml itemL categoryL categoryFun =
           anchor (string2urlencoded (show categoryKey))
                  (h2 [htxt categoryString] :
                   concatMap (\ (_,item)->item++[breakline])
-                            (filter (\ (itemKey,_) -> 
+                            (filter (\ (itemKey,_) ->
                                             categoryFun itemKey categoryKey)
                                      itemL)
                      ++ [categories2LinkList categoryL])
@@ -59,7 +59,7 @@ categories2LinkList categoryL =
 categorizeByItemKey :: [(String,[HtmlExp])] -> [HtmlExp]
 categorizeByItemKey itemL =
    list2CategorizedHtml
-       itemL 
+       itemL
        (map (\c -> (toUpper c,[toUpper c])) (listHeads (map fst itemL)))
        categorizeStringHead
 

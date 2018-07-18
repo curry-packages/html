@@ -8,7 +8,7 @@
 
 module HTML.Parser(readHtmlFile,parseHtmlString) where
 
-import Char
+import Data.Char
 import HTML.Base
 
 --- Reads a file with HTML text and returns the corresponding HTML expressions.
@@ -139,7 +139,7 @@ splitAtElement p (c:cs) =
 
 skipFirstNewLine :: String -> String
 skipFirstNewLine [] = []
-skipFirstNewLine (c:cs) = 
+skipFirstNewLine (c:cs) =
   if c=='\n' then cs
              else if isSpace c then skipFirstNewLine cs else c:cs
 

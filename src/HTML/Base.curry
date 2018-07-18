@@ -51,10 +51,10 @@ module HTML.Base
    addSound,addCookies, formatCookie
  ) where
 
-import Char        ( isAlphaNum, isSpace )
-import ReadNumeric ( readNat, readHex )
-import System      ( getEnviron )
-import Time        ( CalendarTime(..), ClockTime, toTimeString, toUTCTime )
+import Data.Char          ( isAlphaNum, isSpace )
+import Numeric            ( readNat, readHex )
+import System.Environment ( getEnv )
+import Data.Time          ( CalendarTime(..), ClockTime, toTimeString, toUTCTime )
 
 infixl 0 `addAttr`
 infixl 0 `addAttrs`
@@ -992,16 +992,20 @@ htmlTagAttrs = [("lang","en")]
 --- to decode and encode such parameters, respectively.
 
 getUrlParameter :: IO String
-getUrlParameter = getEnviron "QUERY_STRING"
+getUrlParameter = getEnv "QUERY_STRING"
 
 --- Translates urlencoded string into equivalent ASCII string.
 urlencoded2string :: String -> String
 urlencoded2string [] = []
 urlencoded2string (c:cs)
   | c == '+'  = ' ' : urlencoded2string cs
-  | c == '%'  = chr (maybe 0 fst (readHex (take 2 cs)))
+  | c == '%'  = chr (tryReadHex 0 (take 2 cs))
                  : urlencoded2string (drop 2 cs)
   | otherwise = c : urlencoded2string cs
+  where
+   tryReadHex d s = case readHex s of 
+                      [(i,"")] -> i
+                      _        -> d
 
 --- Translates arbitrary strings into equivalent urlencoded string.
 string2urlencoded :: String -> String
@@ -1022,7 +1026,7 @@ string2urlencoded (c:cs)
 --- no other components are important here.
 getCookies :: IO [(String,String)]
 getCookies =
- do cookiestring <- getEnviron "HTTP_COOKIE"
+ do cookiestring <- getEnv "HTTP_COOKIE"
     return $ parseCookies cookiestring
 
 -- translate a string of cookies (of the form "NAME1=VAL1; NAME2=VAL")
@@ -1045,6 +1049,8 @@ coordinates env = let x = env (CgiRef "x")
                         then Just (tryReadNat 0 x, tryReadNat 0 y)
                         else Nothing
  where
-  tryReadNat d s = maybe d (\(i,rs)->if null rs then i else d) (readNat s)
+  tryReadNat d s = case readNat s of
+                     [(i,"")] -> i
+                     _        -> d
 
 ------------------------------------------------------------------------------

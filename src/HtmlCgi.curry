@@ -16,17 +16,18 @@ module HtmlCgi(CgiServerMsg(..),runCgiServerCmd,
                readCgiServerMsg,noHandlerPage,submitForm)
   where
 
-import System
-import Char
-import NamedSocket
-import CPNS(unregisterPort)
-import IO
-import IOExts(exclusiveIO,connectToCommand)
-import Directory(doesFileExist,getCurrentDirectory)
-import ReadNumeric
+import System.Environment
+import System.Process
+import Data.Char
+import Network.NamedSocket
+import Network.CPNS        (unregisterPort)
+import System.IO
+import IOExts              (exclusiveIO, connectToCommand)
+import System.Directory    (doesFileExist, getCurrentDirectory)
+import Numeric
 import ReadShowTerm
-import Time
-import List
+import Data.Time
+import Data.List
 
 --------------------------------------------------------------------------
 -- Should the log messages of the server stored in a log file?
@@ -98,7 +99,7 @@ submitForm = do
 
 -- load balance types:
 data LoadBalance = NoBalance | Standard | Multiple
- deriving Eq
+  deriving Eq
 
 --- Executes a specific command for a cgi server.
 runCgiServerCmd :: String -> CgiServerMsg -> IO ()
@@ -146,7 +147,7 @@ cgikey2portname cgikey =
 -- Forward user inputs for interactive execution of cgi scripts:
 cgiInteractiveScript :: String -> IO ()
 cgiInteractiveScript portname = do
-  cgiServerEnvVals <- mapIO getEnviron cgiServerEnvVars
+  cgiServerEnvVals <- mapIO getEnv cgiServerEnvVars
   let cgiServerEnv = zip cgiServerEnvVars cgiServerEnvVals
   formEnv <- getFormVariables
   catch (sendToServerAndPrintOrFail cgiServerEnv formEnv)
@@ -165,7 +166,7 @@ cgiInteractiveScript portname = do
 -- Forward user inputs to cgi server process:
 cgiScript :: String -> String -> LoadBalance -> String -> String -> IO ()
 cgiScript url serverargs loadbalance portname serverprog = do
-  cgiServerEnvVals <- mapIO getEnviron cgiServerEnvVars
+  cgiServerEnvVals <- mapIO getEnv cgiServerEnvVars
   let cgiServerEnv = zip cgiServerEnvVars cgiServerEnvVals
   let urlparam = head cgiServerEnvVals
   formEnv <- getFormVariables
@@ -184,7 +185,7 @@ cgiScript url serverargs loadbalance portname serverprog = do
            (\_ -> putStrLn (noHandlerPage url urlparam))
  where
   sendToServerAndPrintOrFail scriptKey cgiEnviron newcenv = do
-    h <- trySendScriptServerMessage (portname++scriptKey) 
+    h <- trySendScriptServerMessage (portname++scriptKey)
                                     (CgiSubmit cgiEnviron newcenv)
     eof <- hIsEOF h
     if eof then error "Html.cgiScript: unexpected EOF failure"
@@ -324,7 +325,9 @@ copyOutputAndClose h = do
     l <- hGetLine h
     putStrLn l
     let clen' = if "Content-Length:" `isPrefixOf` l
-                then maybe clen fst (readNat (drop 15 l))
+                then case readNat (drop 15 l) of
+                       [(v,_)] -> v
+                       _       -> clen
                 else clen
     if null l then return clen' else copyUntilEmptyLine clen'
 
@@ -348,8 +351,11 @@ putErrLn s = hPutStrLn stderr s >> hFlush stderr
 --- Used for the implementation of the HTML event handlers.
 getFormVariables :: IO [(String,String)]
 getFormVariables = do
-  clen <- getEnviron "CONTENT_LENGTH"
-  cont <- getNChar (maybe 0 fst (readNat clen))
+  clen <- getEnv "CONTENT_LENGTH"
+  let n = case readNat clen of
+            [(v,_)] -> v
+            _       -> 0
+  cont <- getNChar n
   return (includeCoordinates (parseCgiEnv cont))
 
 -- translate a string of cgi environment bindings into list of binding pairs:
@@ -378,7 +384,7 @@ urlencoded2string :: String -> String
 urlencoded2string [] = []
 urlencoded2string (c:cs)
   | c == '+'  = ' ' : urlencoded2string cs
-  | c == '%'  = chr (maybe 0 fst (readHex (take 2 cs)))
+  | c == '%'  = chr (fst (head (readHex (take 2 cs))))
                  : urlencoded2string (drop 2 cs)
   | otherwise = c : urlencoded2string cs
 
@@ -392,13 +398,13 @@ utf2latin (c1:c2:cs)
 
 includeCoordinates :: [(String,String)] -> [(String,String)]
 includeCoordinates [] = []
-includeCoordinates ((tag,val):cenv) 
+includeCoordinates ((tag,val):cenv)
   = case break (=='.') tag of
       (_,[]) -> (tag,val):includeCoordinates cenv
       (event,['.','x']) -> ("x",val):(event,val):includeCoordinates cenv
       (_,['.','y']) -> ("y",val):includeCoordinates cenv
       _ -> error "includeCoordinates: unexpected . in url parameter"
-   
+
 
 -- get n chars from stdin:
 getNChar :: Int -> IO String

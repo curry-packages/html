@@ -13,7 +13,7 @@ module HTML.LaTeX
  , germanLatexDoc, htmlSpecialChars2tex
  ) where
 
-import List ( intercalate )
+import Data.List ( intercalate )
 
 import HTML.Base
 

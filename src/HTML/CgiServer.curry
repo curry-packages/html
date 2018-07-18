@@ -14,20 +14,21 @@ module HTML.CgiServer
  , intForm, intFormMain
  ) where
 
-import Char        ( isSpace )
-import Directory    (getHomeDirectory)
-import Distribution (installDir)
+import Data.Time
+import Data.Char        ( isSpace )
+import Data.List        ( intercalate )
+import System.Process
+import System.Environment
+import System.IO
+import System.Directory (getHomeDirectory)
+import System.Random    ( getRandomSeed, nextInt )
+import Distribution     (installDir)
 import HTML.Base
 import HtmlCgi
-import IO
-import List ( intercalate )
-import NamedSocket
-import Profile
-import Random       ( getRandomSeed, nextInt )
-import ReadNumeric  ( readNat )
+import Network.NamedSocket
+import Debug.Profile
+import Numeric      ( readNat )
 import ReadShowTerm ( showQTerm, readsQTerm )
-import System
-import Time
 --import Unsafe(showAnyQExpression) -- to show status of cgi server
 
 ------------------------------------------------------------------------------
@@ -176,7 +177,7 @@ serveCgiMessagesForForm servertimeout url cgikey portname
   serveCgiMessage state hdl (CgiSubmit scriptenv formenv) = do
       let scriptkey = maybe "" id (lookup "SCRIPTKEY" scriptenv)
       mapIO_ (\(var,val) -> if var=="SCRIPTKEY" then done
-                                                else setEnviron var val)
+                                                else setEnv var val)
              scriptenv
       if null formenv -- initial form?
        then serveFormInEnv state scriptkey initform []
@@ -304,7 +305,7 @@ addHtmlContentType htmlstring =
 showHtmlFormInEnv :: String -> String -> HtmlForm -> Int
                      -> IO (String,[(HtmlHandler,String)])
 showHtmlFormInEnv url key (HtmlForm ftitle fparams fhexp) crefnr = do
-  qstr <- getEnviron "QUERY_STRING"
+  qstr <- getEnv "QUERY_STRING"
   --putStrLn (showHtmlExps [pre [par (env2html cenv),hrule]]) --debug
   (title,params,hexps,firsthandler,evhs) <-
     htmlForm2html (HtmlForm ftitle fparams fhexp) crefnr
@@ -355,7 +356,9 @@ getMaxFieldNr ((name,_):env) =
 
 -- try to read a natural number in a string or return first argument:
 tryReadNat :: Int -> String -> Int
-tryReadNat d s = maybe d (\(i,rs)->if null rs then i else d) (readNat s)
+tryReadNat d s = case readNat s of
+  [(i,"")] -> i
+  _        -> d
 
 -- get the value assigned to a name in a given cgi environment
 cgiGetValue :: [(String,String)] -> CgiRef -> String
@@ -521,7 +524,7 @@ intFormMain :: String -> String -> String -> String ->
               Bool -> String -> IO HtmlForm -> IO ()
 intFormMain baseurl basecgi reldir cginame forever urlparam hformact = do
   pid      <- getPID
-  user     <- getEnviron "USER"
+  user     <- getEnv "USER"
   home     <- getHomeDirectory
   let portname = "intcgi_" ++ show pid
   socket <- listenOn portname
@@ -533,7 +536,7 @@ intFormMain baseurl basecgi reldir cginame forever urlparam hformact = do
                 (if null reldir  then "" else reldir ++"/") ++ cgiprogname
       cgikey = url++" 42"
   installShowCgiEnvScript portname cgifile
-  setEnviron "QUERY_STRING" urlparam
+  setEnv "QUERY_STRING" urlparam
   time <- getClockTime
   intFormInEnv url cgikey hformact hformact [] (initialServerState time)
                forever socket
@@ -566,7 +569,7 @@ intFormInEnv url cgikey initform hformact cenv state forever socket = do
    intFormProceed nstate hdl (CgiSubmit scriptenv newcenv) = do
     hPutStrLn hdl answerTxt
     hClose hdl
-    mapIO_ (\ (var,val) -> setEnviron var val) scriptenv
+    mapIO_ (\ (var,val) -> setEnv var val) scriptenv
     if null newcenv -- call to initial script?
      then intFormInEnv url cgikey initform initform [] nstate forever socket
      else do
