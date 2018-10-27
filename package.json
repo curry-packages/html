@@ -4,7 +4,9 @@
     "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
     "synopsis": "Libraries for HTML programming.",
     "category": [ "Web" ],
-    "dependencies": { },
+    "dependencies": {
+        "base": ">= 2.0.0"
+    },
     "exportedModules": [ "HTML.Base", "HTML.CgiServer",
                          "HTML.CategorizedList", "HTML.LaTeX",
                          "HTML.Parser",
