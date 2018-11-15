@@ -1,6 +1,7 @@
 ------------------------------------------------------------------------------
--- Example for CGI programming in Curry:
--- a form with a text input field and two event handlers
+-- Example for HTML programming in Curry:
+---
+-- A form with a text input field and two event handlers
 ------------------------------------------------------------------------------
 
 import HTML.Base
@@ -22,5 +23,5 @@ main = return $ form "QUESTION" $
           [h1 [htxt $ "Duplicated input: " ++ env tref ++ env tref]]
 
 
--- Install the CGI program by:
--- curry makecgi -o ~/public_html/revdup.cgi RevDup
+-- Install the CGI script in user homepage by:
+-- > curry-makecgi -o ~/public_html/revdup.cgi RevDup

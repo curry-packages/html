@@ -3,25 +3,21 @@
 --- to implement dynamic web pages.
 ---
 --- @author Michael Hanus
---- @version October 2017
---- @category web
+--- @version November 2018
 ------------------------------------------------------------------------------
 
 {-# OPTIONS_CYMAKE -Wno-incomplete-patterns #-}
 
-module HTML.CgiServer
+module HTML.CGI.Server
  ( runFormServerWithKey, runFormServerWithKeyAndFormParams
  , intForm, intFormMain
  ) where
 
-import Char        ( isSpace )
-import Directory    (getHomeDirectory)
-import Distribution (installDir)
-import HTML.Base
-import HtmlCgi
+import Char         ( isSpace )
+import Directory    ( getHomeDirectory )
+import Distribution ( installDir )
 import IO
-import List ( intercalate )
-import NamedSocket
+import List         ( intercalate )
 import Profile
 import Random       ( getRandomSeed, nextInt )
 import ReadNumeric  ( readNat )
@@ -29,6 +25,10 @@ import ReadShowTerm ( showQTerm, readsQTerm )
 import System
 import Time
 --import Unsafe(showAnyQExpression) -- to show status of cgi server
+
+import HTML.Base
+import HTML.CGI
+import Network.NamedSocket
 
 ------------------------------------------------------------------------------
 --- The server implementing an HTML form (possibly containing input fields).
@@ -608,8 +608,8 @@ installShowCgiEnvScript :: String -> String -> IO ()
 installShowCgiEnvScript portname cgifile = do
   putStrLn ">>> Installing web script..."
   putStrLn $ "for port name: "++portname
-  writeFile cgifile $ "#!/bin/sh\n"++
-                      installDir++"/www/submitform \""++portname++"\"\n"
+  writeFile cgifile $ "#!/bin/sh\n"++ -- TODO: update location:
+                      installDir ++ "/www/submitform \"" ++ portname ++ "\"\n"
   system ("chmod 755 "++cgifile)
   done
 
@@ -661,11 +661,11 @@ getServerStatus :: ServerState -> IO String
 getServerStatus state@(stime,maxkey,_,evs) = do
   busy   <- getServerLoad state
   lstime <- toCalendarTime stime
-  pinfos <- getProcessInfos
+  --pinfos <- getProcessInfos -- seems to leads to an error...
   return $ "Status: " ++ busy ++ ", Maxkey: "++show maxkey ++ ", #Handlers: " ++
            show (length evs) ++ ", Start time: " ++
-           calendarTimeToString lstime ++ "\n" ++
-           showMemInfo pinfos
+           calendarTimeToString lstime ++ "\n"
+           -- showMemInfo pinfos
 
 --- Shows the group key of a handler as a string.
 showGroupKey :: Maybe Int -> String

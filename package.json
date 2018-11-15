@@ -1,11 +1,14 @@
 {
     "name": "html",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "author": "Michael Hanus <mh@informatik.uni-kiel.de>",
     "synopsis": "Libraries for HTML programming.",
     "category": [ "Web" ],
-    "dependencies": { },
-    "exportedModules": [ "HTML.Base", "HTML.CgiServer",
+    "dependencies": {
+        "html-cgi": ">= 0.0.1"
+    },
+    "sourceDirs": [ "src", "scripts" ],
+    "exportedModules": [ "HTML.Base",
                          "HTML.CategorizedList", "HTML.LaTeX",
                          "HTML.Parser",
                          "HTML.Styles.Bootstrap3" ],
@@ -15,6 +18,11 @@
     },
     "license": "BSD-3-Clause",
     "licenseFile": "LICENSE",
+    "executable": {
+        "name": "curry-makecgi",
+        "main": "MakeCGI"
+    },
+    "configModule": "HTML.CGI.PackageConfig",
     "source": {
         "git": "https://git.ps.informatik.uni-kiel.de/curry-packages/html.git",
         "tag": "$version"
