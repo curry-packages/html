@@ -26,7 +26,7 @@ main :: IO HtmlForm
 main = do
   param <- getUrlParameter
   remote <- getEnviron "REMOTE_ADDR"
-  if remote == "127.0.0.1"
+  if remote `elem` ["127.0.0.1","::1"]
     then do result <- execCommand param
             return $ answerText result
     else return $ answerText $
@@ -36,6 +36,7 @@ execCommand :: String -> IO String
 execCommand param = case param of
   "status" -> cpnsCmd "status"
   "log"    -> cpnsCmd "log"
+  "start"  -> cpnsCmd "start"
   _        -> return $ unlines $
                 ["ILLEGAL URL PARAMETER: " ++ param, "", cpnsCommands]
  where
@@ -43,7 +44,7 @@ execCommand param = case param of
     (_,out,err) <- evalCmd "curry-cpnsd" [cmd] ""
     return $ out ++ if null err then "" else "ERROR OUTPUT:\n" ++ err
 
-  cpnsCommands = "Allowed arguments: status | log"
+  cpnsCommands = "Allowed arguments: status | log | start"
 
 
 -- Install the CGI script in user homepage by:

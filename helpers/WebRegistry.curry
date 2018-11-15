@@ -28,7 +28,7 @@ main :: IO HtmlForm
 main = do
   param <- getUrlParameter
   remote <- getEnviron "REMOTE_ADDR"
-  if remote == "127.0.0.1"
+  if remote `elem` ["127.0.0.1","::1"]
     then do result <- execCommand param
             return $ answerText result
     else return $ answerText $
