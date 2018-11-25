@@ -32,22 +32,30 @@ ARGS=
 
 while [ $# -gt 0 -a -z "$ERROR" ]; do
   case $1 in
-   -help | -h | -\? ) HELP=yes ;;
-   -D*              ) CURRYDOPTIONS="$CURRYDOPTIONS $1" ;;
-   -cpm             ) echo 'Option "-cpm" deprecated.' ;;
-   -cpmexec         ) shift ; CPMEXEC=$1 ;;
-   -compact         ) COMPACT=yes ;;
-   -servertimeout   ) shift ; SERVERTIMEOUT="-servertimeout $1" ;;
-   -multipleservers ) LOADBALANCE="-loadbalance multiple" ;; # backward compt.
-   -loadbalance     ) shift ; LOADBALANCE="-loadbalance $1" ;;
-   -standalone      ) STANDALONE=yes ;;
-   -ulimit          ) shift; ULIMIT=$1 ;;
-   -wuijs           ) WUIJS=yes ;;
-   -wui             ) shift; WUIMODULES="$WUIMODULES $1" ;;
-   -m               ) shift; MAIN=$1 ;;
-   -o               ) shift; CGIFILE=$1 ;;
-   -*               ) ERROR="Unknown option: $1" ;;
-   *                ) ARGS="$ARGS $1" ;; # collect non-option arguments
+   --help | -h | -\? ) HELP=yes ;;
+   -D*               ) CURRYDOPTIONS="$CURRYDOPTIONS $1" ;;
+   --cpmexec         ) shift ; CPMEXEC=$1 ;;
+   -cpmexec          ) shift ; CPMEXEC=$1 ;;
+   --compact         ) COMPACT=yes ;;
+   -compact          ) COMPACT=yes ;;
+   --servertimeout   ) shift ; SERVERTIMEOUT="-servertimeout $1" ;;
+   -servertimeout    ) shift ; SERVERTIMEOUT="-servertimeout $1" ;;
+   --multipleservers ) LOADBALANCE="-loadbalance multiple" ;; # backward compt.
+   -multipleservers  ) LOADBALANCE="-loadbalance multiple" ;; # backward compt.
+   --loadbalance     ) shift ; LOADBALANCE="-loadbalance $1" ;;
+   -loadbalance      ) shift ; LOADBALANCE="-loadbalance $1" ;;
+   --standalone      ) STANDALONE=yes ;;
+   -standalone       ) STANDALONE=yes ;;
+   --ulimit          ) shift; ULIMIT=$1 ;;
+   -ulimit           ) shift; ULIMIT=$1 ;;
+   --wuijs           ) WUIJS=yes ;;
+   -wuijs            ) WUIJS=yes ;;
+   --wui             ) shift; WUIMODULES="$WUIMODULES $1" ;;
+   -wui              ) shift; WUIMODULES="$WUIMODULES $1" ;;
+   -m                ) shift; MAIN=$1 ;;
+   -o                ) shift; CGIFILE=$1 ;;
+   -*                ) ERROR="Unknown option: $1" ;;
+   *                 ) ARGS="$ARGS $1" ;; # collect non-option arguments
   esac
   shift
 done
@@ -76,25 +84,25 @@ if [ $# != 1 -a $# != 3 ] ; then
   echo
   echo "FURTHER OPTIONS:"
   echo '-Dname=val  : define (curry)rc property "name" as "val"'
-  echo "-cpmexec <c>: set the command to execute programs with the Curry Package"
-  echo "              Manager (default: 'cypm exec')"
-  echo "-compact    : reduce size of generated cgi program by deleting unused functions"
-  echo "-ulimit <l> : set 'ulimit <l>' when executing the cgi program"
-  echo "              (default: '-t 120')"
-  echo "-servertimeout <ms>: set the timeout for the cgi server process to"
-  echo "                     <ms> milliseconds (default: 7200000 / two hours)"
-  echo "-loadbalance <t>: start new server process if load for one server is"
-  echo "                  high where <t> specifies the kind of high load."
-  echo "                  Current possible values for <t>:"
-  echo "        no:       no load balance"
-  echo "        standard: some standard load balancing (default)"
-  echo "        multiple: new server process for each initial call to"
+  echo "--cpmexec <c>: set the command to execute programs with the Curry Package"
+  echo "               Manager (default: 'cypm exec')"
+  echo "--compact    : reduce size of generated cgi program by deleting unused functions"
+  echo "--ulimit <l> : set 'ulimit <l>' when executing the cgi program"
+  echo "               (default: '-t 120')"
+  echo "--servertimeout <ms>: set the timeout for the cgi server process to"
+  echo "                      <ms> milliseconds (default: 7200000 / two hours)"
+  echo "--loadbalance <t>: start new server process if load for one server is"
+  echo "                   high where <t> specifies the kind of high load."
+  echo "                   Current possible values for <t>:"
+  echo "         no:       no load balance"
+  echo "         standard: some standard load balancing (default)"
+  echo "         multiple: new server process for each initial call to"
   echo "                  a cgi script (only reasonable with short timeout)"
-  echo "-standalone : generate standalone script (i.e., copy programs"
-  echo "              required from package 'html-cgi' to deploy directory)"
-  echo "-wuijs      : generate JavaScript support code for WUIs"
-  echo "-wui <mod>  : consider also imported module <mod> (that contains WUI"
-  echo "              specifications) when generating JavaScript support code"
+  echo "--standalone : generate standalone script (i.e., copy programs"
+  echo "               required from package 'html-cgi' to deploy directory)"
+  echo "--wuijs      : generate JavaScript support code for WUIs"
+  echo "--wui <mod>  : consider also imported module <mod> (that contains WUI"
+  echo "               specifications) when generating JavaScript support code"
   exit 1
 fi
 
@@ -189,28 +197,6 @@ else
   CGIREGISTRY=`realpath $CGIREGISTRY`
 fi
 
-# stop old server, if necessary:
-if [ -f $CGISERVEREXEC ] ; then
-  echo "Stop old version of the server '$CGISERVEREXEC'..."
-  $CGIREGISTRY stopscript "$CGISERVEREXEC"
-fi
-
-# copy executable if required:
-if [ $STANDALONE = yes ] ; then
-  cp -p "$CGIREGISTRY" $CGIFILEPATHNAME/$CGIREG
-  CGIREGISTRY="./$CGIREG"
-fi
-
-# generate cgi script:
-rm -f $CGIFILE
-echo "#!/bin/sh" >> $CGIFILE
-if test -n "$LANG" ; then
-  echo "LANG=$LANG" >> $CGIFILE
-  echo "export LANG" >> $CGIFILE
-fi
-echo "$CGIREGISTRY submit $SERVERTIMEOUT $LOADBALANCE \"$CGIPROG\" \"$CGIKEY\" \"$CGISERVERCMD\" 2>> $CGIFILE.log" >> $CGIFILE
-chmod 755 $CGIFILE
-
 # set bin directory containing CPNSD
 CPNSD=curry-cpnsd
 CPNSDPATH=`which $CPNSD`
@@ -222,6 +208,31 @@ else
   rm -f $MAINMOD $MAINMOD.curry
   exit 1
 fi
+
+# stop old server, if necessary:
+if [ -f $CGISERVEREXEC ] ; then
+  echo "Stop old version of the server '$CGISERVEREXEC'..."
+  $CGIREGISTRY stopscript "$CGISERVEREXEC"
+fi
+
+# copy auxiliary executables if web application should be stand-alone:
+if [ $STANDALONE = yes ] ; then
+  mkdir -p $CGIFILEPATHNAME/html_bin
+  cp -p "$CGIREGISTRY" $CGIFILEPATHNAME/html_bin/$CGIREG
+  CGIREGISTRY="html_bin/$CGIREG"
+  cp -p $CPNSDBINDIR/$CPNSD $CGIFILEPATHNAME/html_bin/$CPNSD
+  CPNSDBINDIR=$CGIFILEPATHNAME/html_bin
+fi
+
+# generate cgi script:
+rm -f $CGIFILE
+echo "#!/bin/sh" >> $CGIFILE
+if test -n "$LANG" ; then
+  echo "LANG=$LANG" >> $CGIFILE
+  echo "export LANG" >> $CGIFILE
+fi
+echo "$CGIREGISTRY submit $SERVERTIMEOUT $LOADBALANCE \"$CGIPROG\" \"$CGIKEY\" \"$CGISERVERCMD\" 2>> $CGIFILE.log" >> $CGIFILE
+chmod 755 $CGIFILE
 
 # move compiled executable to final position and generate small shell
 # script to call the executable with ulimit and correct path:
