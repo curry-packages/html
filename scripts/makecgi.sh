@@ -140,6 +140,9 @@ else
   CGIPROG=`expr $CGIFILE : "$CGIDIR/\(.*\)"`
 fi
 
+# generate cgi target directory if necessary:
+mkdir -p $CGIDIR
+
 # name of the server:
 CGIFILEPATHNAME=`(cd $CGIDIR > /dev/null ; pwd)`
 CGISERVERPROG=$CGIPROG.server
