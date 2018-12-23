@@ -5,7 +5,8 @@
     "synopsis": "Libraries for HTML programming.",
     "category": [ "Web" ],
     "dependencies": {
-        "html-cgi": ">= 0.0.1"
+        "html-cgi": ">= 0.0.1",
+        "random"  : ">= 0.0.1"
     },
     "sourceDirs": [ "src", "scripts" ],
     "exportedModules": [ "HTML.Base",

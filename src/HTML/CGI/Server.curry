@@ -3,7 +3,7 @@
 --- to implement dynamic web pages.
 ---
 --- @author Michael Hanus
---- @version November 2018
+--- @version December 2018
 ------------------------------------------------------------------------------
 
 {-# OPTIONS_CYMAKE -Wno-incomplete-patterns #-}
@@ -19,7 +19,6 @@ import Distribution ( installDir )
 import IO
 import List         ( intercalate )
 import Profile
-import Random       ( getRandomSeed, nextInt )
 import ReadNumeric  ( readNat )
 import ReadShowTerm ( showQTerm, readsQTerm )
 import System
@@ -29,6 +28,7 @@ import Time
 import HTML.Base
 import HTML.CGI
 import Network.NamedSocket
+import System.Random       ( getRandomSeed, nextInt )
 
 ------------------------------------------------------------------------------
 --- The server implementing an HTML form (possibly containing input fields).
