@@ -18,7 +18,6 @@ import Directory    ( getHomeDirectory )
 import Distribution ( installDir )
 import IO
 import List         ( intercalate )
-import Profile
 import ReadNumeric  ( readNat )
 import ReadShowTerm ( showQTerm, readsQTerm )
 import System
