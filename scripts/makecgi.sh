@@ -83,7 +83,9 @@ if [ $# != 1 -a $# != 3 ] ; then
   echo "<curry>    : name of the Curry program (without suffix) containing the script"
   echo
   echo "FURTHER OPTIONS:"
-  echo '-Dname=val  : define (curry)rc property "name" as "val"'
+  echo "--system=path: set path to the root of Curry system"
+  echo "               (then 'path/bin/curry' is invoked to compile script)"
+  echo '-Dname=val   : define (curry)rc property "name" as "val"'
   echo "--cpmexec <c>: set the command to execute programs with the Curry Package"
   echo "               Manager (default: 'cypm exec')"
   echo "--compact    : reduce size of generated cgi program by deleting unused functions"
@@ -177,7 +179,7 @@ else
 fi
 
 # compile main module:
-echo "Generating saved state for initial expression: $MAIN"
+echo "Generating executable for initial expression: $MAIN"
 $CPMEXEC $CURRYROOT/bin/curry --nocypm $CURRYDOPTIONS $CURRYOPTIONS :l $MAINMOD :save $MAINCALL :q
 
 # now the file $MAINMOD should contain the executable computing the HTML form:
