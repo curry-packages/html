@@ -5,6 +5,7 @@
     "synopsis": "Libraries for HTML programming.",
     "category": [ "Web" ],
     "dependencies": {
+        "base"    : ">= 1.0.0, < 2.0.0",
         "html-cgi": ">= 0.0.1",
         "random"  : ">= 0.0.1"
     },
@@ -14,8 +15,8 @@
                          "HTML.Parser",
                          "HTML.Styles.Bootstrap3" ],
     "compilerCompatibility": {
-        "pakcs": ">= 2.0.0",
-        "kics2": ">= 2.0.0"
+        "pakcs": ">= 2.0.0, < 3.0.0",
+        "kics2": ">= 2.0.0, < 3.0.0"
     },
     "license": "BSD-3-Clause",
     "licenseFile": "LICENSE",
