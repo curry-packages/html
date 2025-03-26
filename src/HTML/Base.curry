@@ -1,6 +1,6 @@
 ------------------------------------------------------------------------------
 --- Library for constructing static and dynamic HTML pages.
---- [This paper](http://www.informatik.uni-kiel.de/~mh/papers/PADL01.html)
+--- The [PADL 2001 paper](https://doi.org/10.1007/3-540-45241-9_6)
 --- contains a description of the basic ideas behind this library.
 ---
 --- The installation of a cgi script written with this library
